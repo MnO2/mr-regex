@@ -1,0 +1,16 @@
+[package]
+name = "mr-regex"
+version = "0.1.0"
+authors = ["Paul Meng <me@paulme.ng>"]
+edition = "2018"
+license = "Apache-2.0 OR BSD-3-Clause"
+readme = "README.md"
+repository = "https://github.com/MnO2/mr-regex"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+id-arena = "2.2.1"
+
+[dev-dependencies]
+criterion = "0.3"
