@@ -1,7 +1,7 @@
 use id_arena::{Arena, Id};
 
 type AsciiString = Vec<u8>;
-type AsciiStringRef<'a> = &'a [u8];
+pub type AsciiStringRef<'a> = &'a [u8];
 
 type NFAStateId = Id<NFAState>;
 type VisitedNodes = Vec<NFAStateId>;
@@ -266,22 +266,32 @@ fn dfs(
     false
 }
 
-fn is_match(arena: &Arena<NFAState>, nfa: NFAFragment, search: AsciiStringRef) -> bool {
-    let mut visited = vec![];
-    dfs(&arena, nfa.start, search, 0, &mut visited)
+pub struct Regex {
+    fragment: NFAFragment,
+    arena: Arena<NFAState>,
 }
 
-fn re(regexp: AsciiStringRef) -> (NFAFragment, Arena<NFAState>) {
-    let mut arena: Arena<NFAState> = Arena::new();
-    let concatted = insert_concat_operator(regexp);
-    let postfix = regexp_to_postfix(&concatted);
-    let result = postfix_to_nfa(&mut arena, &postfix);
-    (result, arena)
+impl Regex {
+    pub fn new(regexp: AsciiStringRef) -> Option<Self> {
+        let mut arena: Arena<NFAState> = Arena::new();
+        let concatted = insert_concat_operator(regexp);
+        let postfix = regexp_to_postfix(&concatted);
+        let result = postfix_to_nfa(&mut arena, &postfix);
+        Some(Regex {
+            fragment: result,
+            arena,
+        })
+    }
+
+    pub fn is_match(&self, search: AsciiStringRef) -> bool {
+        let mut visited = vec![];
+        dfs(&self.arena, self.fragment.start, search, 0, &mut visited)
+    }
 }
 
 pub fn regex_match(regexp: &str, search: &str) -> bool {
-    let (compiled, arena) = re(regexp.as_bytes());
-    is_match(&arena, compiled, search.as_bytes())
+    let r = Regex::new(regexp.as_bytes()).unwrap();
+    r.is_match(search.as_bytes())
 }
 
 #[cfg(test)]
